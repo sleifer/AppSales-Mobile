@@ -141,7 +141,7 @@
 - (void)viewDidLoad
 {
 	[super viewDidLoad];
-	previousOrientation = self.interfaceOrientation;
+	previousOrientation = -1;
 	[self reloadData];
 }
 
