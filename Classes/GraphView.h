@@ -33,7 +33,7 @@
 @end
 
 
-@interface GraphView : UIView <UIScrollViewDelegate> {
+@interface GraphView : UIView <UIScrollViewDelegate, UIGestureRecognizerDelegate> {
 
 	id<GraphViewDataSource> dataSource;
 	id<GraphViewDelegate> delegate;

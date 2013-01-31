@@ -640,32 +640,39 @@
 			reports = self.sortedCalendarMonthReports;
 		}
 	}
-	ReportDetailViewController *vc = [[[ReportDetailViewController alloc] initWithReports:reports selectedIndex:index] autorelease];
-	vc.selectedProduct = [self.selectedProducts lastObject];
-	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-		[self.navigationController pushViewController:vc animated:YES];
+	ReportDetailViewController *vc = nil;
+    if (index != NSUIntegerMax) {
+        vc = [[[ReportDetailViewController alloc] initWithReports:reports selectedIndex:index] autorelease];
+        vc.selectedProduct = [self.selectedProducts lastObject];
+    }
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+		if (index != NSUIntegerMax) {
+            [self.navigationController pushViewController:vc animated:YES];
+        }
 	} else {
 		if (self.selectedReportPopover.isPopoverVisible) {
 			ReportDetailViewController *selectedReportDetailViewController = (ReportDetailViewController *)[[(UINavigationController *)self.selectedReportPopover.contentViewController viewControllers] objectAtIndex:0];
-			if (selectedReportDetailViewController.selectedReportIndex == index) {
+			if (index == NSUIntegerMax || selectedReportDetailViewController.selectedReportIndex == index) {
 				[self.selectedReportPopover dismissPopoverAnimated:YES];
 				return;
 			} else {
 				[self.selectedReportPopover dismissPopoverAnimated:NO];
 			}
 		}
-		UINavigationController *nav = [[[UINavigationController alloc] initWithRootViewController:vc] autorelease];
-		self.selectedReportPopover = [[[UIPopoverController alloc] initWithContentViewController:nav] autorelease];
-		self.selectedReportPopover.passthroughViews = [NSArray arrayWithObjects:self.graphView, nil];
-		if (UIInterfaceOrientationIsPortrait(self.interfaceOrientation)) {
-			[self.selectedReportPopover presentPopoverFromRect:barFrame 
-														inView:self.graphView 
-									  permittedArrowDirections:UIPopoverArrowDirectionUp animated:YES];
-		} else {
-			[self.selectedReportPopover presentPopoverFromRect:barFrame 
-														inView:self.graphView 
-									  permittedArrowDirections:UIPopoverArrowDirectionLeft | UIPopoverArrowDirectionRight animated:YES];
-		}
+		if (index != NSUIntegerMax) {
+            UINavigationController *nav = [[[UINavigationController alloc] initWithRootViewController:vc] autorelease];
+            self.selectedReportPopover = [[[UIPopoverController alloc] initWithContentViewController:nav] autorelease];
+            self.selectedReportPopover.passthroughViews = [NSArray arrayWithObjects:self.graphView, nil];
+            if (UIInterfaceOrientationIsPortrait(self.interfaceOrientation)) {
+                [self.selectedReportPopover presentPopoverFromRect:barFrame 
+                                                            inView:self.graphView 
+                                          permittedArrowDirections:UIPopoverArrowDirectionUp animated:YES];
+            } else {
+                [self.selectedReportPopover presentPopoverFromRect:barFrame 
+                                                            inView:self.graphView 
+                                          permittedArrowDirections:UIPopoverArrowDirectionLeft | UIPopoverArrowDirectionRight animated:YES];
+            }
+        }
 	}
 }
 

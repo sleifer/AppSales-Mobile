@@ -42,7 +42,7 @@
 		lockIndicatorView.frame = CGRectMake(15, 7, 16, 16);
 		lockIndicatorView.hidden = YES;
 		[self addSubview:lockIndicatorView];
-		
+        
 		UILongPressGestureRecognizer *lockScaleRecognizer = [[[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(lockScale:)] autorelease];
 		[scaleView addGestureRecognizer:lockScaleRecognizer];
 		
@@ -56,7 +56,11 @@
 		scrollView.alwaysBounceHorizontal = YES;
 		scrollView.showsVerticalScrollIndicator = NO;
 		[self addSubview:scrollView];
-		
+
+        UITapGestureRecognizer *selectNoneRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(selectNone:)] autorelease];
+        selectNoneRecognizer.delegate = self;
+		[scrollView addGestureRecognizer:selectNoneRecognizer];
+
 		titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 4, self.bounds.size.width, 12)];
 		titleLabel.font = [UIFont boldSystemFontOfSize:11.0];
 		titleLabel.textAlignment = UITextAlignmentCenter;
@@ -81,6 +85,23 @@
 		max = -1.0;
 	}
     return self;
+}
+
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
+{
+    CGPoint locationInScrollView = [gestureRecognizer locationInView:scrollView];
+    UIView *hitView = [scrollView hitTest:locationInScrollView withEvent:nil];
+    if (hitView == scrollView) {
+        return YES;
+    }
+    return NO;
+}
+
+- (void)selectNone:(UITapGestureRecognizer *)recognizer
+{
+    if ([recognizer state] == UIGestureRecognizerStateRecognized) {
+        [self.delegate graphView:self didSelectBarAtIndex:NSUIntegerMax withFrame:CGRectZero];
+    }
 }
 
 - (void)longPress:(UILongPressGestureRecognizer *)recognizer
