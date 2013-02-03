@@ -265,7 +265,19 @@
 		totalRevenue = [self.selectedReport totalRevenueInBaseCurrencyForProductWithID:nil inCountry:self.selectedCountry];
 	}
 	
-	[sortedEntries addObject:[ReportDetailEntry entryWithRevenue:totalRevenue percentage:0 subtitle:nil country:@"world" product:nil]];
+
+    NSInteger sales = 0;
+    for (NSString *country in [sortedCountries reverseObjectEnumerator]) {
+		if (self.selectedProduct) {
+			sales += [[[paidDownloadsByCountryAndProduct objectForKey:[country uppercaseString]] objectForKey:self.selectedProduct.productID] integerValue];
+		} else {
+			NSDictionary *salesByProduct = [paidDownloadsByCountryAndProduct objectForKey:[country uppercaseString]];
+			sales += [[[salesByProduct allValues] valueForKeyPath:@"@sum.self"] integerValue];
+		}
+	}
+    
+    NSString *totalSalesSubtitle = [NSString stringWithFormat:@"%i %@", sales, sales == 1 ? @"sale" : @"sales"];
+	[sortedEntries addObject:[ReportDetailEntry entryWithRevenue:totalRevenue percentage:0 subtitle:totalSalesSubtitle country:@"world" product:nil]];
 	
 	for (NSString *country in [sortedCountries reverseObjectEnumerator]) {
 		float revenue = [[revenuesByCountry objectForKey:country] floatValue];
@@ -285,7 +297,7 @@
 	self.countryEntries = [NSArray arrayWithArray:sortedEntries];
 	
 	NSMutableArray *entries = [NSMutableArray array];
-	ReportDetailEntry *allProductsEntry = [ReportDetailEntry entryWithRevenue:totalRevenue percentage:0 subtitle:nil country:nil product:nil];
+	ReportDetailEntry *allProductsEntry = [ReportDetailEntry entryWithRevenue:totalRevenue percentage:0 subtitle:totalSalesSubtitle country:nil product:nil];
 	[entries addObject:allProductsEntry];
 	ASAccount *account = [[self.selectedReport firstReport] valueForKey:@"account"];
 	NSArray *allProducts = [[account.products allObjects] sortedArrayUsingDescriptors:[NSArray arrayWithObject:[[[NSSortDescriptor alloc] initWithKey:@"productID" ascending:NO] autorelease]]];

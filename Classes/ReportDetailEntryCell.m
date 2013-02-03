@@ -90,7 +90,7 @@
 	barBackgroundView.hidden = hideBar;
 	barView.hidden = hideBar;
 	percentageLabel.hidden = hideBar;
-	subtitleLabel.hidden = hideBar;
+	subtitleLabel.hidden = NO;
 	
 	if (!hideBar) {
 		percentageLabel.text = [percentageFormatter stringFromNumber:[NSNumber numberWithFloat:percentage]];
