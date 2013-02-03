@@ -419,6 +419,40 @@
 }
 
 
+- (void)showSalesTotals:(id)sender
+{
+    NSInteger productRowIndex = [sender tag];
+    
+    Product *product = nil;
+	if (productRowIndex != 0) {
+		product = [self.visibleProducts objectAtIndex:productRowIndex - 1];
+	}
+    
+    ReportCollection *totalsCollection = [[[ReportCollection alloc] initWithReports:sortedFiscalMonthReports] autorelease];
+    totalsCollection.title = @"Totals";
+    
+    CGRect barFrame = [sender bounds];
+    NSArray *reports = [NSArray arrayWithObject:totalsCollection];
+	ReportDetailViewController *vc = nil;
+    vc = [[[ReportDetailViewController alloc] initWithReports:reports selectedIndex:0] autorelease];
+    vc.selectedProduct = product;
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+        [self.navigationController pushViewController:vc animated:YES];
+	} else {
+		if (self.selectedReportPopover.isPopoverVisible) {
+            [self.selectedReportPopover dismissPopoverAnimated:NO];
+		}
+        UINavigationController *nav = [[[UINavigationController alloc] initWithRootViewController:vc] autorelease];
+        self.selectedReportPopover = [[[UIPopoverController alloc] initWithContentViewController:nav] autorelease];
+        self.selectedReportPopover.passthroughViews = [NSArray arrayWithObjects:self.graphView, nil];
+        [self.selectedReportPopover presentPopoverFromRect:barFrame
+                                                        inView:sender
+                                      permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+	}
+
+}
+
+
 - (void)switchGraphMode:(id)sender
 {
 	if (viewMode != DashboardViewModeRevenue) {
@@ -708,7 +742,7 @@
 	}
 	if (selectedTab == 0 || selectedTab == 1) {
 		UIButton *latestValueButton = [UIButton buttonWithType:UIButtonTypeCustom];
-		latestValueButton.frame = CGRectMake(0, 0, 64, 28);
+		latestValueButton.frame = CGRectMake(54, 0, 64, 28);
 		latestValueButton.titleLabel.font = [UIFont boldSystemFontOfSize:16.0];
 		latestValueButton.titleLabel.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.5];
 		latestValueButton.titleLabel.shadowOffset = CGSizeMake(0, -1);
@@ -730,8 +764,8 @@
 		}
 		
 		if (viewMode == DashboardViewModeRevenue) {
-			NSString *label = [NSString stringWithFormat:@"%@%i", 
-							   [[CurrencyManager sharedManager] baseCurrencyDescription], 
+			NSString *label = [NSString stringWithFormat:@"%@%i",
+							   [[CurrencyManager sharedManager] baseCurrencyDescription],
 							   (int)roundf([latestReport totalRevenueInBaseCurrencyForProductWithID:product.productID])];
 			[latestValueButton setTitle:label forState:UIControlStateNormal];
 		} else {
@@ -751,7 +785,24 @@
 			[latestValueButton setTitle:label forState:UIControlStateNormal];
 		}
 		[latestValueButton addTarget:self action:@selector(switchGraphMode:) forControlEvents:UIControlEventTouchUpInside];
-		return latestValueButton;
+        
+        UIButton *totalsButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		totalsButton.frame = CGRectMake(0, 0, 44, 28);
+		totalsButton.titleLabel.font = [UIFont boldSystemFontOfSize:16.0];
+		totalsButton.titleLabel.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.5];
+		totalsButton.titleLabel.shadowOffset = CGSizeMake(0, -1);
+		[totalsButton setBackgroundImage:[UIImage imageNamed:@"LatestValueButton.png"] forState:UIControlStateNormal];
+		[totalsButton setBackgroundImage:[UIImage imageNamed:@"LatestValueButton.png"] forState:UIControlStateHighlighted];
+		
+        [totalsButton setTitle:@"∑" forState:UIControlStateNormal];
+		[totalsButton addTarget:self action:@selector(showSalesTotals:) forControlEvents:UIControlEventTouchUpInside];
+        [totalsButton setTag:indexPath.row];
+        
+        UIView *wrapper = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 118, 28)] autorelease];
+        [wrapper addSubview:latestValueButton];
+        [wrapper addSubview:totalsButton];
+        
+		return wrapper;
 	}
 	return nil;
 }
